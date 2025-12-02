@@ -1,4 +1,4 @@
-// --- LÓGICA DE LOGIN ---
+
 const loginForm = document.getElementById('login-form');
 
 if (loginForm) {
@@ -8,7 +8,6 @@ if (loginForm) {
         const pass = document.getElementById('password').value;
         const errorMsg = document.getElementById('error-msg');
 
-        // Credenciales quemadas para la prueba: admin / 1234
         if (user === 'admin' && pass === '1234') {
             localStorage.setItem('isLoggedIn', 'true');
             window.location.href = 'dashboard.html';
@@ -23,12 +22,10 @@ function logout() {
     window.location.href = 'index.html';
 }
 
-// --- LÓGICA DE CRUD ---
 const crudForm = document.getElementById('crud-form');
 const tableBody = document.getElementById('table-body');
 let editIndex = -1;
 
-// Cargar productos desde LocalStorage
 function loadProducts() {
     const products = JSON.parse(localStorage.getItem('products')) || [];
     tableBody.innerHTML = '';
@@ -48,7 +45,6 @@ function loadProducts() {
     });
 }
 
-// Guardar (Crear o Actualizar)
 if (crudForm) {
     crudForm.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -57,10 +53,8 @@ if (crudForm) {
         let products = JSON.parse(localStorage.getItem('products')) || [];
 
         if (editIndex === -1) {
-            // CREAR
             products.push({ name, price });
         } else {
-            // ACTUALIZAR
             products[editIndex] = { name, price };
             editIndex = -1;
             document.getElementById('submit-btn').innerText = 'Guardar Producto';
@@ -79,22 +73,18 @@ if (crudForm) {
     });
 }
 
-// Preparar edición
 window.editProduct = (index) => {
     const products = JSON.parse(localStorage.getItem('products')) || [];
     document.getElementById('product-name').value = products[index].name;
     document.getElementById('product-price').value = products[index].price;
     editIndex = index;
     
-    // Cambiar texto del botón para que Selenium detecte el cambio de estado si es necesario
     const btn = document.getElementById('submit-btn');
     btn.innerText = 'Actualizar';
     btn.style.backgroundColor = '#ffc107'; 
 };
 
-// Eliminar
 window.deleteProduct = (index) => {
-    // Confirmación simple (Selenium puede manejar alertas nativas)
     if(confirm('¿Estás seguro de eliminar este producto?')) {
         let products = JSON.parse(localStorage.getItem('products')) || [];
         products.splice(index, 1);
