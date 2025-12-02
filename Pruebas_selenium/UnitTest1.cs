@@ -7,12 +7,13 @@ namespace Pruebas_selenium
     {
         private IWebDriver driver;
         private string rutaDelProyecto;
+        private string carpetaFotos; 
 
         [SetUp]
         public void Setup()
         {
             var options = new ChromeOptions();
-            options.AddArgument("--start-maximized"); 
+            options.AddArgument("--start-maximized");
 
             driver = new ChromeDriver(options);
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
@@ -21,6 +22,13 @@ namespace Pruebas_selenium
             string rutaRelativa = Path.Combine(directorioBase, @"..\..\..\..\Pagina web");
             rutaDelProyecto = Path.GetFullPath(rutaRelativa);
 
+            string rutaEvidencias = Path.Combine(directorioBase, @"..\..\..\..\Evidencias");
+            carpetaFotos = Path.GetFullPath(rutaEvidencias);
+
+            if (!Directory.Exists(carpetaFotos))
+            {
+                Directory.CreateDirectory(carpetaFotos);
+            }
         }
 
         [Test]
@@ -31,12 +39,10 @@ namespace Pruebas_selenium
             driver.FindElement(By.Id("username")).SendKeys("admin");
             driver.FindElement(By.Id("password")).SendKeys("1234");
             driver.FindElement(By.Id("login-btn")).Click();
-
-            Thread.Sleep(1000); 
+            Thread.Sleep(1000);
 
             bool loginExitoso = driver.Url.Contains("dashboard.html") || driver.FindElements(By.Id("logout-btn")).Count > 0;
-            
-            Assert.That(loginExitoso, Is.True, "El login falló, no se redirigió al dashboard.");
+            Assert.That(loginExitoso, Is.True, "El login falló.");
         }
 
         [Test]
@@ -49,8 +55,7 @@ namespace Pruebas_selenium
             driver.FindElement(By.Id("login-btn")).Click();
 
             var errorMsg = driver.FindElement(By.Id("error-msg"));
-            
-            Assert.That(errorMsg.Displayed, Is.True, "No apareció el mensaje de error.");
+            Assert.That(errorMsg.Displayed, Is.True, "No apareció mensaje de error.");
         }
 
         [Test]
@@ -63,8 +68,7 @@ namespace Pruebas_selenium
             driver.FindElement(By.Id("submit-btn")).Click();
 
             var tabla = driver.FindElement(By.Id("table-body"));
-            
-            Assert.That(tabla.Text, Does.Contain("Monitor 4K"), "El producto no apareció en la tabla.");
+            Assert.That(tabla.Text, Does.Contain("Monitor 4K"));
         }
 
         [Test]
@@ -78,12 +82,11 @@ namespace Pruebas_selenium
             var inputNombre = driver.FindElement(By.Id("product-name"));
             inputNombre.Clear();
             inputNombre.SendKeys("Silla Oficina");
-            
+
             driver.FindElement(By.Id("submit-btn")).Click();
 
             var tabla = driver.FindElement(By.Id("table-body"));
-            
-            Assert.That(tabla.Text, Does.Contain("Silla Oficina"), "El nombre no se actualizó.");
+            Assert.That(tabla.Text, Does.Contain("Silla Oficina"));
         }
 
         [Test]
@@ -93,12 +96,11 @@ namespace Pruebas_selenium
             CrearProductoDummy("Teclado Mecanico", "50");
 
             driver.FindElement(By.CssSelector(".delete")).Click();
-
             driver.SwitchTo().Alert().Accept();
+            Thread.Sleep(500); 
 
             var tabla = driver.FindElement(By.Id("table-body"));
-            
-            Assert.That(tabla.Text.Contains("Teclado Mecanico"), Is.False, "El producto no se borró.");
+            Assert.That(tabla.Text.Contains("Teclado Mecanico"), Is.False);
         }
 
         [TearDown]
@@ -106,9 +108,32 @@ namespace Pruebas_selenium
         {
             if (driver != null)
             {
-                driver.Quit();
-                driver.Dispose();
+                try
+                {
+                    TomarCapturaPantalla();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("No se pudo tomar foto: " + ex.Message);
+                }
+                finally
+                {
+                    driver.Quit();
+                    driver.Dispose();
+                }
             }
+        }
+
+        private void TomarCapturaPantalla()
+        {
+            ITakesScreenshot camara = driver as ITakesScreenshot;
+            Screenshot foto = camara.GetScreenshot();
+
+            string nombrePrueba = TestContext.CurrentContext.Test.Name;
+            string nombreArchivo = Path.Combine(carpetaFotos, nombrePrueba + ".png");
+
+            foto.SaveAsFile(nombreArchivo);
+            TestContext.AddTestAttachment(nombreArchivo); 
         }
 
         private void Navegar(string archivo)
