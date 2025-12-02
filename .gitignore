@@ -1,0 +1,5 @@
+**/bin/
+**/obj/
+**/TestResults/
+.vscode/
+.DS_Store
