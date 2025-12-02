@@ -27,7 +27,6 @@ const crudForm = document.getElementById('crud-form');
 const tableBody = document.getElementById('table-body');
 let editIndex = -1;
 
-// Cargar productos desde LocalStorage
 function loadProducts() {
     const products = JSON.parse(localStorage.getItem('products')) || [];
     tableBody.innerHTML = '';
@@ -47,7 +46,6 @@ function loadProducts() {
     });
 }
 
-// Guardar (Crear o Actualizar)
 if (crudForm) {
     crudForm.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -76,19 +74,16 @@ if (crudForm) {
     });
 }
 
-// Preparar edición
 window.editProduct = (index) => {
     const products = JSON.parse(localStorage.getItem('products')) || [];
     document.getElementById('product-name').value = products[index].name;
     document.getElementById('product-price').value = products[index].price;
     editIndex = index;
-
     const btn = document.getElementById('submit-btn');
     btn.innerText = 'Actualizar';
     btn.style.backgroundColor = '#ffc107'; 
 };
 
-// Eliminar
 window.deleteProduct = (index) => {
     if(confirm('¿Estás seguro de eliminar este producto?')) {
         let products = JSON.parse(localStorage.getItem('products')) || [];
